@@ -11,7 +11,7 @@ import env, { configDotenv } from "dotenv";
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
-const PORT = 3000
+const PORT = process.env.PORT || 3000;
 var isLoggedIn = false;
 const saltRounds = 10;
 env.config();
@@ -28,11 +28,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const db = new pg.Client({
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DATABASE,
-    password: process.env.PG_PASSWORD,
-    port: process.env.PG_PORT,
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 db.connect();
 
@@ -283,7 +282,7 @@ passport.deserializeUser((user, cb) => {
     cb(null, user);
 });
 
-app.listen(PORT, (req, res) => {
+app.listen(PORT, '0.0.0.0', (req, res) => {
     console.log(`server on port ${PORT}`)
 })
 
