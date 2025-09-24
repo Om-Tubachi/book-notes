@@ -284,7 +284,7 @@ passport.deserializeUser((user, cb) => {
 });
 
 app.listen(PORT, (req, res) => {
-    console.log(`server on port ${port}`)
+    console.log(`server on port ${PORT}`)
 })
 
 
