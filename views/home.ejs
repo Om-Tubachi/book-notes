@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+
+    <body >
+        <div class="container-box">
+            <div class="heading">Book Notes</div>
+            <div class="short-line">Contemplations on books by an avid reader</div>
+            <div class="view-btn">
+                <a  class="action-btns"  href="/list" role="button">View all</a>
+            </div>
+            <div class="actions-rectangle">
+                <% if (locals.loggedIn) { %>
+                    <div>
+                        <a  class="action-btns"  href="/myList" role="button">View my posts</a>
+                    </div>
+                    <div>
+                        <a  class="action-btns"  href="/create" role="button">create</a>
+                    </div>
+                    <div>
+                        <a class="action-btns" href="/logout" role="button">Log Out</a>
+                    </div>
+                    <% } else { %>
+                        <div>
+                        <a  class="action-btns" href="/login" role="button">Login</a></div>
+                         <!-- <div>
+                        <a   class="action-btns" href="/register" role="button">Register</a></div> -->
+
+                        <% } %>
+            </div>
+        </div>
+        </div>
+        <%- include('partials/footer') %>
+
+
+
+
+            <!-- 
+        <a class="btn btn-dark btn-lg" href="/list" role="button">View all posts</a>
+                <% if (locals.loggedIn) { %>
+                    <a class="btn btn-dark btn-lg" href="/myList" role="button">View my posts</a>
+                    <a class="btn btn-dark btn-lg" href="/create" role="button">create</a>
+                    <a class="btn btn-light btn-lg" href="/logout" role="button">Log Out</a>
+                    <% } else { %>
+                        <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+                        <a class="btn btn-dark btn-lg" href="/register" role="button">Register</a>
+
+                        <% } %>
+        
+        -->

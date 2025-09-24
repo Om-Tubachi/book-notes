@@ -1,0 +1,129 @@
+<!-- list all file -->
+<%- include('partials/header') %>
+<% if (locals.posts) { %>
+    <div class="list">
+        <% posts.forEach(post => { %>
+            <div class="post-wrapper" data-post-id="<%= post.book_id %>">
+                <div class="post" data-post-id="<%= post.book_id %>" style="cursor: pointer;">
+                    <div class="image">
+                        <% if (post.image) { %>
+                            <img src="<%= post.image %>" alt="<%= post.title || 'Book cover' %>" loading="lazy"
+                                onerror="this.parentElement.innerHTML='<div class=&quot;image-placeholder&quot;>Image not available</div>'">
+                        <% } else { %>
+                            <div class="image-placeholder">
+                                No Image<br>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="text-info-card">
+                        <div class="menu-box">
+                            <div class="book-title">
+                                <%= post.title || 'No Title' %>
+                            </div>
+                        </div>
+                        <div class="book-author">
+                            <%= post.author || 'Unknown Author' %>
+                        </div>
+                        <div class="concoct">
+                            <%= post.concoct || 'No summary available' %>
+                        </div>
+                        <div class="date">
+                            <%= post.date_created ? new Date(post.date_created).toLocaleDateString() : 'No Date' %>
+                        </div>
+                        <div class="time">
+                            <%= post.time_created || 'No time' %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side panel - different for logged in users vs visitors -->
+                <% if (locals.loggedIn && currUser.id === post.id) { %>
+                    <!-- Owner's side panel with edit/delete options -->
+                    <div class="permanent-side-panel owner-panel">
+                        <button class="panel-toggle-btn" onclick="togglePanel(event, '<%= post.book_id %>')">
+                            <div class="btn-icon">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </div>
+                        </button>
+                        <button class="panel-toggle-btn" onclick="readMore(event, '<%= post.book_id %>')">
+                            <div class="btn-icon">
+                                <span class="material-symbols-outlined">library_books</span>
+                            </div>
+                        </button>
+
+                        <!-- Overlay that appears on click -->
+                        <div class="panel-overlay" id="overlay-<%= post.book_id %>">
+                            <div class="overlay-content">
+                                <form action="/modify" method="POST" class="overlay-form">
+                                    <input type="hidden" name="post_id" value="<%= post.book_id %>">
+                                    <button name="action" value="edit" class="overlay-btn edit-btn" type="submit">
+                                        <span class="btn-icon"></span>
+                                        Edit
+                                    </button>
+                                    <button name="action" value="delete" class="overlay-btn delete-btn" type="submit">
+                                        <span class="btn-icon"></span>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <!-- Visitor's side panel with only read option -->
+                    <div class="permanent-side-panel visitor-panel">
+                        <button class="panel-toggle-btn" onclick="readMore(event, '<%= post.book_id %>')">
+                            <div class="btn-icon">
+                                <span class="material-symbols-outlined">library_books</span>
+                            </div>
+                        </button>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="actions-rectangle">
+        <% if (locals.loggedIn) { %>
+            <div>
+                <a class="action-btns" href="/myList" role="button">View my posts</a>
+            </div>
+            <div>
+                <a class="action-btns" href="/create" role="button">create</a>
+            </div>
+        <% } %>
+        <div>
+            <a class="action-btns" href="/" role="button">Back to home</a>
+        </div>
+    </div>
+
+<% } else { %>
+    <div style="text-align: center; color: #888; padding: 40px;">
+        No books found. Add some books to get started!
+    </div>
+<% } %>
+
+<script>
+    // Read more function
+    function readMore(event, postId) {
+        event.stopPropagation();
+        window.location.href = '/post/' + postId;
+    }
+
+    // Close overlay when clicking outside
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.permanent-side-panel')) {
+            document.querySelectorAll('.panel-overlay').forEach(overlay => {
+                overlay.style.display = 'none';
+            });
+        }
+    });
+
+    // Prevent post click when clicking on side panel
+    document.querySelectorAll('.permanent-side-panel').forEach(panel => {
+        panel.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    });
+</script>
+
+<%- include('partials/footer') %>

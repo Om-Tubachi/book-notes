@@ -1,0 +1,132 @@
+<!-- My list file with permanent side panel -->
+<%- include('partials/header') %>
+
+    <% if (locals.posts && posts.length> 0) { %>
+        <div class="list">
+            <% posts.forEach(post=> { %>
+                <div class="post-wrapper" data-post-id="<%= post.book_id %>">
+                    <div class="post" data-post-id="<%= post.book_id %>" style="cursor: pointer;">
+                        <div class="image">
+                            <% if (post.image) { %>
+                                <img src="<%= post.image %>" alt="Book cover"
+                                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                <% } else { %>
+                                    No Image
+                                    <% } %>
+                        </div>
+                        <div class="text-info-card">
+                            <div class="book-title">
+                                <%= post.title || 'No Title' %>
+                            </div>
+                            <div class="book-author">
+                                <%= post.author || 'Unknown Author' %>
+                            </div>
+                            <div class="concoct">
+                                <%= post.concoct || 'No summary available' %>
+                            </div>
+                            <div class="date">
+                                <%= post.date_created ? new Date(post.date_created).toLocaleDateString() : 'No Date' %>
+                            </div>
+                            <div class="time">
+                                <%= post.time_created || 'No time' %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Permanent side panel for user's own posts -->
+                    <% if (locals.loggedIn && currUser.id===post.id) { %>
+                        <div class="permanent-side-panel">
+                            <button class="panel-toggle-btn" onclick="togglePanel(event, '<%= post.book_id %>')">
+                                <div class="btn-icon"><span class="material-symbols-outlined">
+                                        more_vert
+                                    </span></div>
+                            </button>
+                            <button class="panel-toggle-btn" onclick="readMore(event, '<%= post.book_id %>')">
+                                <div class="btn-icon"><span class="material-symbols-outlined">
+                                        library_books
+                                    </span></div>
+                            </button>
+
+                            <!-- Overlay that appears on click -->
+                            <div class="panel-overlay" id="overlay-<%= post.book_id %>">
+                                <div class="overlay-content">
+                                    <form action="/modify" method="POST" class="overlay-form">
+                                        <input type="hidden" name="post_id" value="<%= post.book_id %>">
+                                        <button name="action" value="edit" class="overlay-btn edit-btn" type="submit">
+                                            <span class="btn-icon"></span>
+                                            Edit
+                                        </button>
+                                        <button name="action" value="delete" class="overlay-btn delete-btn"
+                                            type="submit">
+                                            <span class="btn-icon"></span>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                </div>
+                <% }); %>
+        </div>
+
+        <% } else { %>
+            <div style="text-align: center; color: #fff; padding: 40px;">
+                No books found. Add some books to get started!
+            </div>
+            <% } %>
+
+
+               <div class="actions-rectangle">
+                <% if (locals.loggedIn) { %>
+                    <div>
+                        <a  class="action-btns"  href="/create" role="button">create</a>
+                    </div>
+                    <% }%>
+                    <div>
+                        <a  class="action-btns"  href="/" role="button">Back to home</a>
+                    </div>
+            </div>
+
+                        <script>
+                            // Add double-click event to posts for navigation
+                            function readMore(event, postId) {
+                                event.stopPropagation();
+                                window.location.href = '/post/' + postId;
+                            };
+
+                            // Toggle overlay panel
+                            function togglePanel(event, postId) {
+                                event.stopPropagation();
+                                const overlay = document.getElementById('overlay-' + postId);
+                                const isVisible = overlay.style.display === 'block';
+
+                                // Close all other overlays first
+                                document.querySelectorAll('.panel-overlay').forEach(panel => {
+                                    panel.style.display = 'none';
+                                });
+
+                                // Toggle current overlay
+                                if (!isVisible) {
+                                    overlay.style.display = 'block';
+                                }
+                            }
+
+                            // Close overlay when clicking outside
+                            document.addEventListener('click', function (event) {
+                                if (!event.target.closest('.permanent-side-panel')) {
+                                    document.querySelectorAll('.panel-overlay').forEach(overlay => {
+                                        overlay.style.display = 'none';
+                                    });
+                                }
+                            });
+
+                            // Prevent post click when clicking on side panel
+                            document.querySelectorAll('.permanent-side-panel').forEach(panel => {
+                                panel.addEventListener('click', function (e) {
+                                    e.stopPropagation();
+                                });
+                            });
+                        </script>
+
+                        <%- include('partials/footer') %>

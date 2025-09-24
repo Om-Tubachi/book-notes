@@ -1,0 +1,35 @@
+<!-- EDIT PAGE -->
+<%- include('partials/header.ejs') %>
+<% if (locals.loggedIn) { %>
+    <div class="create-box">
+    <form action="/edit" method="POST">
+        <input type="hidden" name="post_id" value="<%= post.book_id %>">
+        <input value="<%=post.title %>" type="text" name="title" placeholder="Post title" required>
+        <input value="<%=post.author %>" type="text" name="author" placeholder="Author name" required>
+        <input value="<%=post.concoct %>" type="text" name="concoct" placeholder="One Sentence" required>
+        <textarea id="mytextarea" name="content"><%- post.content %></textarea>
+        <button type="submit">Update Post</button>
+    </form>
+</div>
+
+    <script>
+        tinymce.init({
+            selector: '#mytextarea',
+            plugins: [
+                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+                'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'ai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown', 'importword', 'exportword', 'exportpdf'
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+            uploadcare_public_key: '0f2de8e259ba6d7b4f9c',
+        });
+    </script>
+<% } else { %>
+    <h1>not in</h1>
+<% } %>

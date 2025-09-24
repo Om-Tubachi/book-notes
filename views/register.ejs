@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <form action="/register" method="POST" class="auth-form">
+      <!-- Username -->
+      <input type="text" name="username" placeholder="User name" required>
+
+      <!-- Email -->
+      <input type="email" name="email" placeholder="Email" required>
+
+      <!-- Password -->
+      <input type="password" name="password" placeholder="Password" required>
+
+
+      <!-- Register button -->
+      <button type="submit">Register</button>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
