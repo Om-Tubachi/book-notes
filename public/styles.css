@@ -70,7 +70,7 @@ body {
     padding: 0.8rem 2rem;
     font-weight: 400;
     font-size: 1.3rem;
-    color: #d9d9d95a;
+    color: white;
     text-decoration: none;
 }
 
@@ -78,6 +78,9 @@ body {
 .actions-rectangle a:hover {
     text-decoration: none;
     opacity: 0.8;
+}
+#login{
+    color: #171717;
 }
 
 /* ---------- Posts / List ---------- */
@@ -560,7 +563,9 @@ ease;
 .panel-toggle-btn:focus{
     outline: none;
 }
-/* Overlay that appears on click */
+.panel-toggle-btn:hover{
+    background: #bdbcbcd5;
+}
 .panel-overlay {
     display: none;
     position: absolute;

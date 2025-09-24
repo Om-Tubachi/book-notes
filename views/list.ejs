@@ -117,7 +117,37 @@
             });
         }
     });
+function togglePanel(event, postId) {
+                                event.stopPropagation();
+                                const overlay = document.getElementById('overlay-' + postId);
+                                const isVisible = overlay.style.display === 'block';
 
+                                // Close all other overlays first
+                                document.querySelectorAll('.panel-overlay').forEach(panel => {
+                                    panel.style.display = 'none';
+                                });
+
+                                // Toggle current overlay
+                                if (!isVisible) {
+                                    overlay.style.display = 'block';
+                                }
+                            }
+
+                            // Close overlay when clicking outside
+                            document.addEventListener('click', function (event) {
+                                if (!event.target.closest('.permanent-side-panel')) {
+                                    document.querySelectorAll('.panel-overlay').forEach(overlay => {
+                                        overlay.style.display = 'none';
+                                    });
+                                }
+                            });
+
+                            // Prevent post click when clicking on side panel
+                            document.querySelectorAll('.permanent-side-panel').forEach(panel => {
+                                panel.addEventListener('click', function (e) {
+                                    e.stopPropagation();
+                                });
+                            });
     // Prevent post click when clicking on side panel
     document.querySelectorAll('.permanent-side-panel').forEach(panel => {
         panel.addEventListener('click', function (e) {

@@ -54,50 +54,105 @@ app.get("/register", (req, res) => {
 
 
 
+// app.post('/register', async (req, res) => {
+//     console.log(req.body)
+//     const email = req.body.email;
+//     const password = req.body.password;
+//     const username = req.body.username;
+//     try {
+//         const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
+//             email,
+//         ]);
+
+//         if (checkResult.rows.length > 0) {
+//             res.redirect("/login");
+//         } else {
+//             bcrypt.hash(password, saltRounds, async (err, hash) => {
+//                 if (err) {
+//                     console.error("Error hashing password:", err);
+//                 } else {
+//                     const result = await db.query(
+//                         "INSERT INTO users (username , email, password) VALUES ($1, $2 , $3) RETURNING *",
+//                         [username, email, hash]
+//                     );
+//                     const user = result.rows[0];
+//                     req.login(user, (err) => {
+//                         console.log("success");
+//                         res.redirect("/");
+
+//                     });
+//                 }
+//             });
+//         }
+//     } catch (err) {
+//         console.log(err);
+//         res.redirect('/login')
+//     }
+
+// })
 app.post('/register', async (req, res) => {
-    console.log(req.body)
     const email = req.body.email;
     const password = req.body.password;
     const username = req.body.username;
+    
+    if (!email || !password || !username) {
+        return res.redirect('/register');
+    }
+    
     try {
-        const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [
-            email,
-        ]);
+        const checkResult = await db.query("SELECT * FROM users WHERE email = $1", [email]);
 
         if (checkResult.rows.length > 0) {
-            res.redirect("/login");
+            return res.redirect("/login");
         } else {
             bcrypt.hash(password, saltRounds, async (err, hash) => {
                 if (err) {
                     console.error("Error hashing password:", err);
-                } else {
+                    return res.redirect('/register');
+                }
+                
+                try {
                     const result = await db.query(
                         "INSERT INTO users (username , email, password) VALUES ($1, $2 , $3) RETURNING *",
                         [username, email, hash]
                     );
                     const user = result.rows[0];
                     req.login(user, (err) => {
+                        if (err) {
+                            console.error("Login error:", err);
+                            return res.redirect('/login');
+                        }
                         console.log("success");
-                        isLoggedIn = true
                         res.redirect("/");
-
                     });
+                } catch (dbErr) {
+                    console.error("Database error:", dbErr);
+                    res.redirect('/register');
                 }
             });
         }
     } catch (err) {
         console.log(err);
+        res.redirect('/register');
     }
-
 })
 
-app.post(
-    "/login",
-    passport.authenticate("local", {
-        successRedirect: "/",
-        failureRedirect: "/login",
-    })
-);
+app.post("/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+        if (err) {
+            return res.redirect('/login');
+        }
+        if (!user) {
+            return res.redirect('/login');
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                return res.redirect('/login');
+            }
+            return res.redirect('/');
+        });
+    })(req, res, next);
+});
 app.get("/logout", (req, res) => {
     req.logout(function (err) {
         if (err) {
@@ -198,6 +253,27 @@ app.post('/edit', async (req, res) => {
     else res.redirect('/login')
 
 })
+// app.post('/modify', async (req, res) => {
+//     if (req.isAuthenticated()) {
+//         const action = req.body.action;
+//         const postId = req.body.post_id;
+//         if (action === 'edit') {
+//             res.redirect(`/edit-post/${postId}`);
+//         } else if (action === 'delete') {
+//             try {
+//                 await db.query(
+//                     `DELETE FROM posts WHERE book_id = ${postId}`
+//                 )
+//                 console.log('deleted succesfully')
+//                 res.redirect('/list');
+//             } catch (error) {
+//                 console.log(error)
+//             }
+//         }
+//     }
+//     else res.redirect('/login')
+
+// });
 app.post('/modify', async (req, res) => {
     if (req.isAuthenticated()) {
         const action = req.body.action;
@@ -207,25 +283,32 @@ app.post('/modify', async (req, res) => {
         } else if (action === 'delete') {
             try {
                 await db.query(
-                    `DELETE FROM posts WHERE book_id = ${postId}`
+                    `DELETE FROM posts WHERE book_id = $1`, [postId]
                 )
                 console.log('deleted succesfully')
                 res.redirect('/list');
             } catch (error) {
                 console.log(error)
+                res.redirect('/list');
             }
         }
     }
     else res.redirect('/login')
-
 });
 
 async function getMyPosts() {
     const result = await db.query(
-        `SELECT * FROM posts WHERE id = ${currUser.id}`
+        `SELECT * FROM posts WHERE id = $1`, [currUser.id]
     )
     console.log(currUser.id)
     return result.rows
+}
+
+async function getOnePost(id) {
+    const post = await db.query(
+        `SELECT * FROM posts WHERE book_id = $1`, [id]
+    )
+    return post.rows[0]
 }
 async function getAllPosts() {
     const result = await db.query(
@@ -234,20 +317,47 @@ async function getAllPosts() {
     return result.rows;
 }
 
-async function getOnePost(id) {
-    const post = await db.query(
-        `SELECT * FROM posts WHERE book_id = ${id}`
-    )
-    return post.rows[0]
-}
 
+// passport.use(
+//     "local",
+//     new Strategy(async function verify(email, password, cb) {
+//         try {
+//             const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
+//                 email,
+//             ]);
+//             if (result.rows.length > 0) {
+//                 const user = result.rows[0];
+//                 currUser = user;
+//                 const storedHashedPassword = user.password;
+//                 bcrypt.compare(password, storedHashedPassword, (err, valid) => {
+//                     if (err) {
+//                         console.error("Error comparing passwords:", err);
+//                         return cb(err);
+//                     } else {
+//                         if (valid) {
+//                             return cb(null, user);
+//                         } else {
+//                             cb(null, false)
+//                             return cb(null, false);
+//                         }
+//                     }
+//                 });
+//             } else {
+//                 cb(null, false)
+                
+//             }
+//         } catch (err) {
+//             cb(null, false)
+//             res.redirect('/login')
+//             console.log(err);
+//         }
+//     })
+// );
 passport.use(
     "local",
     new Strategy(async function verify(email, password, cb) {
         try {
-            const result = await db.query("SELECT * FROM users WHERE email = $1 ", [
-                email,
-            ]);
+            const result = await db.query("SELECT * FROM users WHERE email = $1 ", [email]);
             if (result.rows.length > 0) {
                 const user = result.rows[0];
                 currUser = user;
@@ -265,14 +375,14 @@ passport.use(
                     }
                 });
             } else {
-                return cb("User not found");
+                return cb(null, false);
             }
         } catch (err) {
             console.log(err);
+            return cb(err);
         }
     })
 );
-
 
 passport.serializeUser((user, cb) => {
     cb(null, user);
