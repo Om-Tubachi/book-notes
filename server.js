@@ -11,7 +11,7 @@ import env, { configDotenv } from "dotenv";
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static('public'))
-const port = 3000
+const PORT = 3000
 var isLoggedIn = false;
 const saltRounds = 10;
 env.config();
@@ -283,7 +283,7 @@ passport.deserializeUser((user, cb) => {
     cb(null, user);
 });
 
-app.listen(port, (req, res) => {
+app.listen(PORT, (req, res) => {
     console.log(`server on port ${port}`)
 })
 
